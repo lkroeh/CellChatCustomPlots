@@ -28,10 +28,10 @@ makehm <- function(cellchatobj, col_fun, sources, targets, fontsize, hmtitle) {
   
   dfall4 <- as.matrix(prephm(df.netPx1outgoing))
  
-  # Build column_split from actual data present, not input vectors
-	n_source_cols <- length(unique(df.netPx1outgoing$source))
-	n_target_cols <- length(unique(df.netPx1outgoing$target))
-	col_split     <- c(rep("outgoing", n_source_cols), 
+  # Build column_split from actual data present, not input vectors.
+ n_source_cols <- length(unique(df.netPx1outgoing$source))
+ n_target_cols <- length(unique(df.netPx1outgoing$target))
+ col_split     <- c(rep("outgoing", n_source_cols), 
                    rep("incoming", n_target_cols))
 
   ht_allctrl = ComplexHeatmap::Heatmap(dfall4, name = hmtitle,

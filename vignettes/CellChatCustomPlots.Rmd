@@ -1,0 +1,174 @@
+---
+title: "Introduction to CellChatCustomPlots"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to CellChatCustomPlots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>"
+)
+```
+
+## Overview
+
+`CellChatCustomPlots` provides custom heatmap and bubble plot visualizations
+for CellChat objects to explore cell-cell communication patterns across
+single or multiple samples.
+
+### Functions
+
+| Function | Description |
+|----------|-------------|
+| `prephm()` | Preprocess CellChat data for heatmap |
+| `makehm()` | Heatmap for a single CellChat object |
+| `makehm_pooled()` | Pooled heatmap across multiple objects |
+| `makehm_pooled_onepathway()` | Pooled heatmap for one pathway |
+| `extract_cellchat_data()` | Extract LR interaction data across objects |
+
+---
+
+## Load the Package and Example Data
+
+```{r load}
+library(CellChatCustomPlots)
+
+data("example_CellChat_list")
+data("example_DB")
+
+length(example_CellChat_list)
+names(example_CellChat_list)
+
+# Available cell types
+dimnames(example_CellChat_list[[1]]@netP$prob)[[1]]
+
+# Available pathways
+dimnames(example_CellChat_list[[1]]@netP$prob)[[3]]
+```
+
+
+```{r plots, include = TRUE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(CellChatCustomPlots)
+
+# Load example data
+data("example_CellChat_list")
+data("example_DB")
+
+# Inspect
+length(example_CellChat_list)
+names(example_CellChat_list)
+
+# Available cell types
+dimnames(example_CellChat_list[[1]]@netP$prob)[[1]]
+
+# Available pathways
+dimnames(example_CellChat_list[[1]]@netP$prob)[[3]]
+
+library(circlize)
+
+# Define sources and targets
+sources <- c("CD8_Prolif")  # replace with your cell types
+targets <- c("mCAF1", "Basal")  # replace with your cell types
+
+# Define color scale
+col_fun = circlize::colorRamp2(c(0, 0.005, 1), c("white", "darkseagreen2", "darkgreen"))
+
+result <- makehm(
+  cellchatobj = example_CellChat_list[[1]],
+  col_fun     = col_fun,
+  sources     = sources,
+  targets     = targets,
+  fontsize    = 10,
+  hmtitle     = "Sample Heatmap"
+)
+
+# Draw the heatmap
+ComplexHeatmap::draw(result[[2]])
+
+# Inspect the data matrix
+head(result[[3]])
+
+result_pooled <- makehm_pooled(
+  all_objects_list = example_CellChat_list,
+  col_fun          = col_fun,
+  sources          = sources,
+  targets          = targets,
+  fontsize         = 10,
+  hmtitle          = "Pooled Heatmap"
+)
+
+ComplexHeatmap::draw(result_pooled[[2]])
+
+# Use first available pathway
+pathway_of_interest <- dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
+
+result_pathway <- makehm_pooled_onepathway(
+  all_objects_list = example_CellChat_list,
+  col_fun          = col_fun,
+  sources          = sources,
+  targets          = targets,
+  fontsize         = 10,
+  pathway          = pathway_of_interest,
+  hmtitle          = "Single Pathway Heatmap"
+)
+
+ComplexHeatmap::draw(result_pathway[[2]])
+
+# Re-attach DB before using extract_cellchat_data
+objects_with_db <- lapply(example_CellChat_list, function(obj) {
+  obj@DB <- example_DB
+  return(obj)
+})
+
+lr_data <- extract_cellchat_data(
+  all_objects_list = objects_with_db,
+  sources.use      = sources,
+  targets.use      = targets,
+  signaling        = dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
+)
+
+head(lr_data)
+
+#plot
+bubble_data <- lr_data %>%
+  group_by(source, target, ligand, receptor, interaction_name) %>%
+  summarise(
+    prob_avg = mean(prob.original, na.rm = TRUE),
+    n_patients = n_distinct(patient),
+    .groups = 'drop'
+  ) %>%
+  dplyr::filter(prob_avg > 0, n_patients > 0)
+
+# Create interaction label
+bubble_data$interaction_label <- paste0(bubble_data$ligand, "-", bubble_data$receptor)
+
+# Bubble plot: size = # patients, color = avg prob
+p1 <- ggplot(bubble_data, 
+             aes(#x = reorder(interaction_label, prob_avg), 
+               x = interaction_label,
+                 y = paste(source, "→", target), 
+                 size = n_patients,      # Size by # patients
+                 fill = prob_avg)) +     # Color by avg probability
+  geom_point(shape = 21, stroke = 0.8, alpha = 0.85) +
+  scale_size_continuous(range = c(1, 5), name = "# Patients") +
+  scale_fill_viridis_c(name = "Avg Probability", option = "plasma") +
+  labs(title = "Epithelial interactions to Mesenchymal",
+       subtitle = "Pooled across patients",
+       x = "Ligand-Receptor Pair", y = "Source → Target") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+        axis.text.y = element_text(size = 11, face = "bold"),
+        legend.position = "right") 
+
+print(p1)
+
+```
