@@ -27,7 +27,13 @@ makehm <- function(cellchatobj, col_fun, sources, targets, fontsize, hmtitle) {
   df.netPx1outgoing <- df.netPx[(df.netPx$source %in% sources) & (df.netPx$target %in% targets),]
   
   dfall4 <- as.matrix(prephm(df.netPx1outgoing))
-  
+ 
+  # Build column_split from actual data present, not input vectors
+	n_source_cols <- length(unique(df.netPx1outgoing$source))
+	n_target_cols <- length(unique(df.netPx1outgoing$target))
+	col_split     <- c(rep("outgoing", n_source_cols), 
+                   rep("incoming", n_target_cols))
+
   ht_allctrl = ComplexHeatmap::Heatmap(dfall4, name = hmtitle,
                                        top_annotation = HeatmapAnnotation(Ctrl = anno_barplot(as.numeric(colSums(dfall4)))),
                                        show_column_dend = FALSE,
@@ -37,7 +43,7 @@ makehm <- function(cellchatobj, col_fun, sources, targets, fontsize, hmtitle) {
                                        show_row_dend = FALSE,
                                        row_title = "Pathways",
                                        row_names_gp = grid::gpar(fontsize = size),
-                                       column_split = paste0(c(rep("outgoing", length(sources)), rep("incoming", length(targets)))),
+                                       column_split = col_split,
                                        column_names_gp = grid::gpar(fontsize = size),
                                        column_title_side="bottom",
                                        col = col_fun) +
