@@ -17,3 +17,6 @@ Imports:
     grid,
     circlize,
     gridExtra
+Depends: 
+    R (>= 3.5)
+LazyData: true
