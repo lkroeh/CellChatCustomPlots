@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
   comment   = "#>"
 )
 library(ggplot2)
+library(dplyr)
 ```
 
 ## Overview
@@ -58,8 +59,8 @@ dimnames(example_CellChat_list[[1]]@netP$prob)[[3]]
 library(circlize)
 
 # Define sources and targets
-sources <- c("CD8_Prolif")  # replace with your cell types
-targets <- c("mCAF1", "Basal")  # replace with your cell types
+sources <- c("mCAF1", "Basal", "CD8_Prolif", "Vendo1")  # replace with your cell types
+targets <- c("mCAF1", "Basal","CD8_Prolif", "Vendo1")  # replace with your cell types
 
 # Define color scale
 col_fun = circlize::colorRamp2(c(0, 0.005, 1), c("white", "darkseagreen2", "darkgreen"))
@@ -129,31 +130,20 @@ lr_data <- extract_cellchat_data(
   all_objects_list = objects_with_db,
   sources.use      = sources,
   targets.use      = targets,
-  signaling        = dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
+  signaling        = "CXCL" #dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
 )
 
 head(lr_data)
 
 #plot
-bubble_data <- do.call(rbind, lapply(
-  split(lr_data, list(lr_data$source, lr_data$target, 
-                      lr_data$ligand, lr_data$receptor, 
-                      lr_data$interaction_name)),
-  function(df) {
-    data.frame(
-      source           = df$source[1],
-      target           = df$target[1],
-      ligand           = df$ligand[1],
-      receptor         = df$receptor[1],
-      interaction_name = df$interaction_name[1],
-      prob_avg         = mean(df$prob.original, na.rm = TRUE),
-      n_patients       = length(unique(df$patient))
-    )
-  }
-))
-
-# Filter
-bubble_data <- bubble_data[bubble_data$prob_avg > 0 & bubble_data$n_patients > 0, ]
+bubble_data <- lr_data %>%
+  group_by(source, target, ligand, receptor, interaction_name) %>%
+  summarise(
+    prob_avg = mean(prob.original, na.rm = TRUE),
+    n_patients = n_distinct(patient),
+    .groups = 'drop'
+  ) %>%
+  dplyr::filter(prob_avg > 0, n_patients > 0)
 
 # Create interaction label
 bubble_data$interaction_label <- paste0(bubble_data$ligand, "-", bubble_data$receptor)
@@ -168,7 +158,7 @@ p1 <- ggplot(bubble_data,
   geom_point(shape = 21, stroke = 0.8, alpha = 0.85) +
   scale_size_continuous(range = c(1, 5), name = "# Patients") +
   scale_fill_viridis_c(name = "Avg Probability", option = "plasma") +
-  labs(title = "Epithelial interactions to Mesenchymal",
+  labs(title = "",
        subtitle = "Pooled across patients",
        x = "Ligand-Receptor Pair", y = "Source → Target") +
   theme_minimal(base_size = 12) +
