@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   collapse  = TRUE,
   comment   = "#>"
 )
+library(ggplot2)
 ```
 
 ## Overview
@@ -50,28 +51,9 @@ dimnames(example_CellChat_list[[1]]@netP$prob)[[1]]
 dimnames(example_CellChat_list[[1]]@netP$prob)[[3]]
 ```
 
+## Single Sample Heatmap
 
-```{r plots, include = TRUE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-
-library(CellChatCustomPlots)
-
-# Load example data
-data("example_CellChat_list")
-data("example_DB")
-
-# Inspect
-length(example_CellChat_list)
-names(example_CellChat_list)
-
-# Available cell types
-dimnames(example_CellChat_list[[1]]@netP$prob)[[1]]
-
-# Available pathways
-dimnames(example_CellChat_list[[1]]@netP$prob)[[3]]
+```{r sshm, include = TRUE}
 
 library(circlize)
 
@@ -96,7 +78,11 @@ ComplexHeatmap::draw(result[[2]])
 
 # Inspect the data matrix
 head(result[[3]])
+```
 
+## Multi Sample Heatmap
+
+```{r mshm, include = TRUE}
 result_pooled <- makehm_pooled(
   all_objects_list = example_CellChat_list,
   col_fun          = col_fun,
@@ -107,6 +93,11 @@ result_pooled <- makehm_pooled(
 )
 
 ComplexHeatmap::draw(result_pooled[[2]])
+```
+
+## Multi Sample Heatmap One Pathway
+
+```{r mshmOP, include = TRUE, eval = FALSE}
 
 # Use first available pathway
 pathway_of_interest <- dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
@@ -122,6 +113,11 @@ result_pathway <- makehm_pooled_onepathway(
 )
 
 ComplexHeatmap::draw(result_pathway[[2]])
+```
+
+## Bubble Plot
+
+```{r bubbleplot, include = TRUE}
 
 # Re-attach DB before using extract_cellchat_data
 objects_with_db <- lapply(example_CellChat_list, function(obj) {
@@ -139,14 +135,25 @@ lr_data <- extract_cellchat_data(
 head(lr_data)
 
 #plot
-bubble_data <- lr_data %>%
-  group_by(source, target, ligand, receptor, interaction_name) %>%
-  summarise(
-    prob_avg = mean(prob.original, na.rm = TRUE),
-    n_patients = n_distinct(patient),
-    .groups = 'drop'
-  ) %>%
-  dplyr::filter(prob_avg > 0, n_patients > 0)
+bubble_data <- do.call(rbind, lapply(
+  split(lr_data, list(lr_data$source, lr_data$target, 
+                      lr_data$ligand, lr_data$receptor, 
+                      lr_data$interaction_name)),
+  function(df) {
+    data.frame(
+      source           = df$source[1],
+      target           = df$target[1],
+      ligand           = df$ligand[1],
+      receptor         = df$receptor[1],
+      interaction_name = df$interaction_name[1],
+      prob_avg         = mean(df$prob.original, na.rm = TRUE),
+      n_patients       = length(unique(df$patient))
+    )
+  }
+))
+
+# Filter
+bubble_data <- bubble_data[bubble_data$prob_avg > 0 & bubble_data$n_patients > 0, ]
 
 # Create interaction label
 bubble_data$interaction_label <- paste0(bubble_data$ligand, "-", bubble_data$receptor)
