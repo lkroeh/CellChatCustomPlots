@@ -98,7 +98,7 @@ ComplexHeatmap::draw(result_pooled[[2]])
 
 ## Multi Sample Heatmap One Pathway
 
-```{r mshmOP, include = TRUE, eval = FALSE}
+```{r mshmOP, include = TRUE, eval = TRUE}
 
 # Use first available pathway
 pathway_of_interest <- dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
