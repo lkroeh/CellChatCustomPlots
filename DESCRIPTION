@@ -23,5 +23,6 @@ LazyData: true
 Suggests: 
     knitr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    dplyr
 VignetteBuilder: knitr
