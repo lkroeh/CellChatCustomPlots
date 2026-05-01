@@ -1,4 +1,14 @@
-url: ~
+url: https://lkroeh.github.io/CellChatCustomPlots/
+
+navbar:
+  title: "CellChatCustomPlots"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Functions"
+      href: reference/index.html
+    - text: "Vignette"
+      href: articles/CellChatCustomPlots.html
+
 template:
   bootstrap: 5
-
