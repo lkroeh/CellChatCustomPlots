@@ -54,7 +54,7 @@ dimnames(example_CellChat_list[[1]]@netP$prob)[[3]]
 
 ## Single Sample Heatmap
 
-```{r sshm, include = TRUE}
+```{r sshm, include = TRUE, fig.retina=2, out.width="100%", fig.width=10, fig.height=6, dev='svg'}
 
 library(circlize)
 
@@ -83,7 +83,7 @@ head(result[[3]])
 
 ## Multi Sample Heatmap
 
-```{r mshm, include = TRUE}
+```{r mshm, include = TRUE, fig.retina=2, out.width="100%", fig.width=10, fig.height=6, dev='svg'}
 result_pooled <- makehm_pooled(
   all_objects_list = example_CellChat_list,
   col_fun          = col_fun,
@@ -98,7 +98,7 @@ ComplexHeatmap::draw(result_pooled[[2]])
 
 ## Multi Sample Heatmap One Pathway
 
-```{r mshmOP, include = TRUE, eval = TRUE}
+```{r mshmOP, include = TRUE, eval = TRUE, fig.retina=2, out.width="100%", fig.width=10, fig.height=6, dev='svg'}
 
 # Use first available pathway
 pathway_of_interest <- dimnames(example_CellChat_list[[1]]@netP$prob)[[3]][1]
@@ -118,7 +118,7 @@ ComplexHeatmap::draw(result_pathway[[2]])
 
 ## Bubble Plot
 
-```{r bubbleplot, include = TRUE}
+```{r bubbleplot, include = TRUE, fig.retina=2, out.width="100%", fig.width=10, fig.height=6, dev='svg'}
 
 # Re-attach DB before using extract_cellchat_data
 objects_with_db <- lapply(example_CellChat_list, function(obj) {
