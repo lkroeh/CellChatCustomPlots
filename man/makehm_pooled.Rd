@@ -4,7 +4,23 @@
 \alias{makehm_pooled}
 \title{Create a pooled CellChat communication heatmap across multiple objects}
 \usage{
-makehm_pooled(all_objects_list, col_fun, sources, targets, fontsize, hmtitle)
+makehm_pooled(
+  all_objects_list,
+  col_fun,
+  sources,
+  targets,
+  fontsize,
+  hmtitle,
+  min_rowsum = 0.05,
+  pool_fun = c("sum", "mean"),
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  row_order = c("signal_strength", "none"),
+  show_row_barplot = TRUE,
+  show_col_barplot = TRUE,
+  show_row_labels = TRUE,
+  column_labels = NULL
+)
 }
 \arguments{
 \item{all_objects_list}{A named list of CellChat objects.}
@@ -18,6 +34,31 @@ makehm_pooled(all_objects_list, col_fun, sources, targets, fontsize, hmtitle)
 \item{fontsize}{Numeric font size for row and column labels.}
 
 \item{hmtitle}{A character string for the heatmap title and legend name.}
+
+\item{min_rowsum}{Numeric row-sum cutoff passed to \code{prephm()}.}
+
+\item{pool_fun}{Character string specifying how to pool probabilities across
+objects. One of \code{"sum"} or \code{"mean"}.}
+
+\item{cluster_rows}{Logical indicating whether to cluster heatmap rows.}
+
+\item{cluster_columns}{Logical indicating whether to cluster heatmap columns
+within each column split.}
+
+\item{row_order}{Character string specifying row ordering. One of
+\code{"signal_strength"} or \code{"none"}.}
+
+\item{show_row_barplot}{Logical indicating whether to show the row-sum
+barplot.}
+
+\item{show_col_barplot}{Logical indicating whether to show the column-sum
+barplot.}
+
+\item{show_row_labels}{Logical indicating whether to show the row-label text
+annotation.}
+
+\item{column_labels}{Optional character vector of labels to display for
+heatmap columns. Defaults to \code{c(sources, targets)}.}
 }
 \value{
 A list of length 3: (1) quantiles of the data matrix,

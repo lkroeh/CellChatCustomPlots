@@ -11,7 +11,17 @@ makehm_compareconditions(
   targets,
   fontsize,
   hmtitle,
-  min_rowsum = 0.01
+  min_rowsum = 0.01,
+  neg_col = "steelblue",
+  mid_col = "grey95",
+  pos_col = "firebrick",
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  row_order = c("treat_increased", "absolute_change", "none"),
+  min_diff = 1e-10,
+  show_row_barplot = TRUE,
+  show_col_barplot = TRUE,
+  show_row_labels = TRUE
 )
 }
 \arguments{
@@ -28,6 +38,32 @@ makehm_compareconditions(
 \item{hmtitle}{A character string for the heatmap title and legend name.}
 
 \item{min_rowsum}{Numeric row-sum cutoff passed to \code{prephm()}.}
+
+\item{neg_col}{Color for negative differences.}
+
+\item{mid_col}{Color for zero-centered differences.}
+
+\item{pos_col}{Color for positive differences.}
+
+\item{cluster_rows}{Logical indicating whether to cluster heatmap rows.}
+
+\item{cluster_columns}{Logical indicating whether to cluster heatmap columns
+within each column split.}
+
+\item{row_order}{Character string specifying row ordering. One of
+\code{"treat_increased"}, \code{"absolute_change"}, or \code{"none"}.}
+
+\item{min_diff}{Numeric row-sum cutoff on absolute differences used to remove
+pathways with little or no change between conditions.}
+
+\item{show_row_barplot}{Logical indicating whether to show the row-sum
+difference barplot.}
+
+\item{show_col_barplot}{Logical indicating whether to show the column-sum
+difference barplot.}
+
+\item{show_row_labels}{Logical indicating whether to show the row-label text
+annotation.}
 }
 \value{
 A named list containing quantiles, heatmap, and diff_mat.
