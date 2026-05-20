@@ -30,7 +30,10 @@ test_that("get_avg_df stops when no objects match", {
   )))
 
   expect_error(
-    get_avg_df(list(obj = obj), sources = "missing", targets = "missing"),
+    expect_warning(
+      get_avg_df(list(obj = obj), sources = "missing", targets = "missing"),
+      "no rows match sources/targets"
+    ),
     "No data found"
   )
 })
@@ -49,4 +52,3 @@ test_that("get_avg_df warns and skips objects with empty netP probability data",
   )
   expect_true(nrow(out) > 0)
 })
-
