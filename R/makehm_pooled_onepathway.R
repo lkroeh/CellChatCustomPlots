@@ -16,7 +16,7 @@
 #'   to generate the heatmap.
 #'
 #' @importFrom reshape2 melt
-#' @importFrom stats aggregate
+#' @importFrom stats aggregate quantile
 #' @importFrom ComplexHeatmap Heatmap HeatmapAnnotation anno_barplot rowAnnotation anno_text
 #' @importFrom grid gpar
 #' @export
@@ -62,7 +62,7 @@ makehm_pooled_onepathway <- function(all_objects_list, col_fun, sources, targets
     rowAnnotation(rn = anno_text(rownames(dfall4), gp = grid::gpar(fontsize = size)))
   
   results <- list()
-  results[[1]] <- quantile(dfall4)
+  results[[1]] <- stats::quantile(dfall4)
   results[[2]] <- ht_allctrl
   results[[3]] <- dfall4
   return(results)

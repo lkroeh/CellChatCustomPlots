@@ -4,11 +4,14 @@
 \alias{prephm}
 \title{Preprocess CellChat probability data for heatmap visualization}
 \usage{
-prephm(df.netPx1outgoing)
+prephm(df.netPx1outgoing, min_rowsum = 0.05)
 }
 \arguments{
 \item{df.netPx1outgoing}{A data frame with columns source, target,
 pathway_name, and prob containing CellChat communication probabilities.}
+
+\item{min_rowsum}{Numeric row-sum cutoff used to remove pathways with low
+total communication probability.}
 }
 \value{
 A data frame with pathways as rows and cell types as columns,
