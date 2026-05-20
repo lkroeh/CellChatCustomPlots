@@ -227,3 +227,117 @@ print(p1)
 ```
 
 ![](CellChatCustomPlots_files/figure-html/bubbleplot-1.png)
+
+## Create Small Toy CellChat-Like Objects
+
+The heatmap functions use the `@netP$prob` slot from CellChat objects.
+For small examples, you can create tiny CellChat-like S4 objects with
+only that slot.
+
+``` r
+setClass("ToyCellChat", slots = c(netP = "list"))
+
+make_toy_cellchat <- function(values,
+                              sources = c("Basal", "mCAF1", "Vendo1"),
+                              targets = c("Basal", "mCAF1", "Vendo1"),
+                              pathways = c("CXCL", "COLLAGEN", "LAMININ", "MHC-I")) {
+  prob <- array(
+    0,
+    dim = c(length(sources), length(targets), length(pathways)),
+    dimnames = list(
+      source = sources,
+      target = targets,
+      pathway_name = pathways
+    )
+  )
+
+  for (value in values) {
+    prob[value$source, value$target, value$pathway] <- value$prob
+  }
+
+  new("ToyCellChat", netP = list(prob = prob))
+}
+
+young_objects <- list(
+  young1 = make_toy_cellchat(list(
+    list(source = "Basal", target = "mCAF1", pathway = "CXCL", prob = 0.10),
+    list(source = "Basal", target = "Vendo1", pathway = "COLLAGEN", prob = 0.05),
+    list(source = "mCAF1", target = "Basal", pathway = "LAMININ", prob = 0.12)
+  )),
+  young2 = make_toy_cellchat(list(
+    list(source = "Basal", target = "mCAF1", pathway = "CXCL", prob = 0.14),
+    list(source = "Basal", target = "Vendo1", pathway = "COLLAGEN", prob = 0.06),
+    list(source = "mCAF1", target = "Basal", pathway = "LAMININ", prob = 0.10)
+  ))
+)
+
+old_objects <- list(
+  old1 = make_toy_cellchat(list(
+    list(source = "Basal", target = "mCAF1", pathway = "CXCL", prob = 0.30),
+    list(source = "Basal", target = "Vendo1", pathway = "COLLAGEN", prob = 0.03),
+    list(source = "mCAF1", target = "Basal", pathway = "LAMININ", prob = 0.04),
+    list(source = "Vendo1", target = "mCAF1", pathway = "MHC-I", prob = 0.15)
+  )),
+  old2 = make_toy_cellchat(list(
+    list(source = "Basal", target = "mCAF1", pathway = "CXCL", prob = 0.26),
+    list(source = "Basal", target = "Vendo1", pathway = "COLLAGEN", prob = 0.02),
+    list(source = "mCAF1", target = "Basal", pathway = "LAMININ", prob = 0.05),
+    list(source = "Vendo1", target = "mCAF1", pathway = "MHC-I", prob = 0.12)
+  ))
+)
+
+toy_sources <- c("Basal", "mCAF1")
+toy_targets <- c("mCAF1", "Vendo1")
+```
+
+## Differential Heatmap Between Conditions
+
+``` r
+result_diff <- makehm_compareconditions(
+  list_ctrl  = young_objects,
+  list_treat = old_objects,
+  sources    = toy_sources,
+  targets    = toy_targets,
+  fontsize   = 10,
+  hmtitle    = "Old vs Young",
+  min_rowsum = 0.01,
+  row_order  = "absolute_change"
+)
+
+ComplexHeatmap::draw(result_diff$heatmap)
+```
+
+![](CellChatCustomPlots_files/figure-html/diffhm-1.png)
+
+``` r
+
+result_diff$diff_mat
+#>          outgoing:Basal outgoing:mCAF1 incoming:mCAF1 incoming:Vendo1
+#> CXCL               0.16              0           0.16            0.00
+#> COLLAGEN          -0.03              0           0.00           -0.03
+```
+
+## Customizing Heatmaps
+
+``` r
+result_custom <- makehm_compareconditions(
+  list_ctrl        = young_objects,
+  list_treat       = old_objects,
+  sources          = toy_sources,
+  targets          = toy_targets,
+  fontsize         = 10,
+  hmtitle          = "Customized Difference Heatmap",
+  min_rowsum       = 0.01,
+  neg_col          = "navy",
+  mid_col          = "white",
+  pos_col          = "red",
+  row_order        = "treat_increased",
+  show_row_barplot = TRUE,
+  show_col_barplot = TRUE,
+  show_row_labels  = TRUE
+)
+
+ComplexHeatmap::draw(result_custom$heatmap)
+```
+
+![](CellChatCustomPlots_files/figure-html/customization-1.png)

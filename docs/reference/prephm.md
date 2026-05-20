@@ -5,7 +5,7 @@ Preprocess CellChat probability data for heatmap visualization
 ## Usage
 
 ``` r
-prephm(df.netPx1outgoing)
+prephm(df.netPx1outgoing, min_rowsum = 0.05)
 ```
 
 ## Arguments
@@ -14,6 +14,11 @@ prephm(df.netPx1outgoing)
     
     A data frame with columns source, target, pathway\_name, and prob
     containing CellChat communication probabilities.
+
+  - min\_rowsum:
+    
+    Numeric row-sum cutoff used to remove pathways with low total
+    communication probability.
 
 ## Value
 
