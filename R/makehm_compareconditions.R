@@ -18,6 +18,7 @@
 #' @importFrom ComplexHeatmap Heatmap HeatmapAnnotation anno_barplot rowAnnotation anno_text
 #' @importFrom circlize colorRamp2
 #' @importFrom grid gpar
+#' @importFrom stats quantile
 #' @export
 makehm_compareconditions <- function(list_ctrl,
                                      list_treat,
@@ -111,7 +112,7 @@ makehm_compareconditions <- function(list_ctrl,
     )
 
   list(
-    quantiles = quantile(mat_diff),
+    quantiles = stats::quantile(mat_diff),
     heatmap = ht,
     diff_mat = mat_diff
   )
